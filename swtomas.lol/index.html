@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwChat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        /* Стили для тем применяются к body */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .theme-light {
+            --bg-primary: #f3f4f6;
+            --bg-secondary: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --accent-color: #4f46e5;
+            --user-bubble-bg: #e0e7ff;
+            --bot-bubble-bg: #f3f4f6;
+            --input-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        .theme-dark {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --accent-color: #818cf8;
+            --user-bubble-bg: #374151;
+            --bot-bubble-bg: #4b5563;
+            --input-bg: #374151;
+            --border-color: #4b5563;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        /* Анимация градиента для заголовка */
+        .animated-gradient {
+            background: linear-gradient(90deg, #ff8a00, #e52e71, #4a00e0, #8e2de2);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-animation 10s ease infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .chat-bubble-user {
+            background-color: var(--user-bubble-bg);
+            color: var(--text-primary);
+        }
+        .chat-bubble-bot {
+            background-color: var(--bot-bubble-bg);
+            color: var(--text-primary);
+        }
+        .input-area, .settings-modal-content, .header-bg, .confirm-modal-content {
+            background-color: var(--bg-secondary);
+        }
+        .message-input {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .settings-button, .send-button, .upload-button {
+             color: var(--text-secondary);
+        }
+        .settings-button:hover, .send-button:hover, .upload-button:hover {
+             color: var(--accent-color);
+        }
+
+        #image-input {
+            display: none;
+        }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <div id="app" class="flex flex-col h-screen">
+        <!-- Шапка -->
+        <header class="header-bg p-4 border-b flex justify-between items-center bg-opacity-70 backdrop-blur-lg" style="border-color: var(--border-color);">
+            <h1 id="greeting" class="text-2xl md:text-3xl font-bold animated-gradient"></h1>
+            <button id="open-settings-btn" class="settings-button p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </header>
+
+        <!-- Окно чата -->
+        <main id="chat-window" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Сообщения будут добавляться сюда -->
+        </main>
+
+        <!-- Поле ввода -->
+        <footer class="input-area p-4 border-t" style="border-color: var(--border-color);">
+            <div class="max-w-4xl mx-auto flex items-center space-x-2">
+                <input type="file" id="image-input" accept="image/*">
+                <button id="upload-btn" class="upload-button p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <input type="text" id="message-input" placeholder="Введите сообщение..." class="message-input flex-1 p-3 rounded-full focus:outline-none focus:ring-2" style="--tw-ring-color: var(--accent-color);">
+                <button id="send-btn" class="send-button p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Модальное окно настроек -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+        <div class="settings-modal-content w-full max-w-md p-6 rounded-lg shadow-xl">
+            <h2 class="text-2xl font-bold mb-4">Настройки</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="username-input" class="block text-sm font-medium" style="color: var(--text-secondary);">Имя пользователя</label>
+                    <input type="text" id="username-input" class="message-input mt-1 block w-full p-2 rounded-md border">
+                </div>
+                <div>
+                    <label for="api-url-input" class="block text-sm font-medium" style="color: var(--text-secondary);">URL API</label>
+                    <input type="text" id="api-url-input" class="message-input mt-1 block w-full p-2 rounded-md border">
+                </div>
+                <div>
+                    <label for="api-model-input" class="block text-sm font-medium" style="color: var(--text-secondary);">Модель для текста</label>
+                    <input type="text" id="api-model-input" class="message-input mt-1 block w-full p-2 rounded-md border">
+                </div>
+                 <div>
+                    <label for="theme-select" class="block text-sm font-medium" style="color: var(--text-secondary);">Тема</label>
+                    <select id="theme-select" class="message-input mt-1 block w-full p-2 rounded-md border">
+                        <option value="light">Светлая</option>
+                        <option value="dark">Темная</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-6 flex flex-col space-y-2">
+                <button id="save-settings-btn" class="w-full text-white font-bold py-2 px-4 rounded transition-transform duration-200 hover:scale-105" style="background-color: var(--accent-color);">Сохранить</button>
+                <button id="clear-history-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-transform duration-200 hover:scale-105">Очистить историю</button>
+                <button id="close-settings-btn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mt-2 transition-transform duration-200 hover:scale-105">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+        <div class="confirm-modal-content w-full max-w-sm p-6 rounded-lg shadow-xl">
+            <h3 id="confirm-title" class="text-lg font-bold mb-4">Подтвердите действие</h3>
+            <p id="confirm-text" class="mb-6" style="color: var(--text-secondary);">Вы уверены?</p>
+            <div class="flex justify-end space-x-4">
+                <button id="confirm-cancel-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-transform duration-200 hover:scale-105">Отмена</button>
+                <button id="confirm-ok-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-transform duration-200 hover:scale-105">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Элементы UI
+            const greetingEl = document.getElementById('greeting');
+            const chatWindow = document.getElementById('chat-window');
+            const messageInput = document.getElementById('message-input');
+            const sendBtn = document.getElementById('send-btn');
+            const uploadBtn = document.getElementById('upload-btn');
+            const imageInput = document.getElementById('image-input');
+            
+            // Настройки
+            const settingsModal = document.getElementById('settings-modal');
+            const openSettingsBtn = document.getElementById('open-settings-btn');
+            const closeSettingsBtn = document.getElementById('close-settings-btn');
+            const saveSettingsBtn = document.getElementById('save-settings-btn');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const usernameInput = document.getElementById('username-input');
+            const apiUrlInput = document.getElementById('api-url-input');
+            const apiModelInput = document.getElementById('api-model-input');
+            const themeSelect = document.getElementById('theme-select');
+
+            // Подтверждение
+            const confirmModal = document.getElementById('confirm-modal');
+            const confirmText = document.getElementById('confirm-text');
+            const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+            const confirmOkBtn = document.getElementById('confirm-ok-btn');
+            let confirmCallback = null;
+            
+            // Конфигурация
+            let config = {
+                username: 'User',
+                apiUrl: 'https://text.pollinations.ai/openai?refferer=swtomas.lol',
+                apiModel: 'openai-reasoning',
+                theme: 'light'
+            };
+
+            let chatHistory = [];
+
+            // --- Функции --- //
+            
+            const saveConfig = () => {
+                localStorage.setItem('ai-messenger-config', JSON.stringify(config));
+            };
+
+            const applyTheme = (theme) => {
+                document.body.classList.remove('theme-light', 'theme-dark');
+                document.body.classList.add(`theme-${theme}`);
+                config.theme = theme;
+            };
+
+            const loadConfig = () => {
+                const savedConfig = localStorage.getItem('ai-messenger-config');
+                if (savedConfig) {
+                    config = JSON.parse(savedConfig);
+                }
+                // Применяем настройки
+                usernameInput.value = config.username;
+                apiUrlInput.value = config.apiUrl;
+                apiModelInput.value = config.apiModel;
+                themeSelect.value = config.theme;
+                applyTheme(config.theme);
+                updateGreeting();
+            };
+
+            const saveHistory = () => {
+                localStorage.setItem('ai-messenger-history', JSON.stringify(chatHistory));
+            };
+
+            const loadHistory = () => {
+                const savedHistory = localStorage.getItem('ai-messenger-history');
+                if (savedHistory) {
+                    chatHistory = JSON.parse(savedHistory);
+                    chatHistory.forEach(msg => addMessageToUI(msg.sender, msg.content, false));
+                }
+            };
+
+            const getGreetingText = () => {
+                const hour = new Date().getHours();
+                if (hour < 5 || hour >= 22) return 'Доброй ночи';
+                if (hour < 12) return 'Доброе утро';
+                if (hour < 18) return 'Добрый день';
+                return 'Добрый вечер';
+            };
+
+            const updateGreeting = () => {
+                greetingEl.textContent = `${getGreetingText()}, ${config.username}!`;
+            };
+            
+            const scrollToBottom = () => {
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            };
+
+            const addMessageToUI = (sender, content, animate = true) => {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+
+                const messageEl = document.createElement('div');
+                messageEl.className = `max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-2xl shadow ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-bot'}`;
+                
+                if (typeof content === 'string') {
+                    messageEl.innerHTML = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+                } else if (content.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = content.url;
+                    img.className = 'rounded-lg max-w-full h-auto';
+                    messageEl.appendChild(img);
+                }
+                
+                if(animate) {
+                    messageEl.style.opacity = 0;
+                    messageEl.style.transform = 'translateY(20px)';
+                    messageEl.style.transition = 'opacity 0.3s, transform 0.3s';
+                }
+
+                messageWrapper.appendChild(messageEl);
+                chatWindow.appendChild(messageWrapper);
+                
+                if(animate){
+                   setTimeout(() => {
+                        messageEl.style.opacity = 1;
+                        messageEl.style.transform = 'translateY(0)';
+                   }, 50);
+                }
+
+                scrollToBottom();
+            };
+            
+            const showTypingIndicator = () => {
+                const typingEl = document.createElement('div');
+                typingEl.id = 'typing-indicator';
+                typingEl.className = 'flex justify-start';
+                typingEl.innerHTML = `
+                    <div class="chat-bubble-bot p-3 rounded-2xl shadow flex items-center space-x-1">
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0s;"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span>
+                    </div>
+                `;
+                chatWindow.appendChild(typingEl);
+                scrollToBottom();
+            };
+            
+            const hideTypingIndicator = () => {
+                const typingEl = document.getElementById('typing-indicator');
+                if (typingEl) {
+                    typingEl.remove();
+                }
+            };
+            
+            const sendMessage = async (messageContent) => {
+                 if ((typeof messageContent === 'string' && !messageContent.trim()) || (typeof messageContent === 'object' && !messageContent.url)) return;
+                 
+                 addMessageToUI('user', messageContent);
+                 chatHistory.push({ sender: 'user', content: messageContent });
+                 saveHistory();
+                 
+                 messageInput.value = '';
+                 showTypingIndicator();
+                 
+                 let payload;
+                 let model = config.apiModel;
+
+                 if (typeof messageContent === 'string') {
+                     payload = {
+                         model: model,
+                         messages: [{ role: 'user', content: messageContent }],
+                         private: false
+                     };
+                 } else if (messageContent.type === 'image') {
+                     model = 'openai'; 
+                     payload = {
+                         model: model,
+                         messages: [
+                             {
+                                 role: "user",
+                                 content: [
+                                     { type: "text", text: "Что на этом изображении?" },
+                                     { type: "image_url", image_url: { url: messageContent.url } }
+                                 ]
+                             }
+                         ],
+                         max_tokens: 500
+                     };
+                 }
+
+                 try {
+                     const response = await fetch(config.apiUrl, {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify(payload)
+                     });
+                     
+                     if (!response.ok) { throw new Error(`Ошибка API: ${response.statusText}`); }
+                     
+                     const result = await response.json();
+                     const botMessage = result.choices?.[0]?.message?.content ?? 'Не удалось получить ответ.';
+                     
+                     hideTypingIndicator();
+                     addMessageToUI('bot', botMessage);
+                     chatHistory.push({ sender: 'bot', content: botMessage });
+                     saveHistory();
+                 } catch (error) {
+                     console.error('Ошибка при отправке сообщения:', error);
+                     hideTypingIndicator();
+                     const errorMessage = `Произошла ошибка: ${error.message}. Проверьте URL API и модель в настройках.`;
+                     addMessageToUI('bot', errorMessage);
+                     chatHistory.push({ sender: 'bot', content: errorMessage });
+                     saveHistory();
+                 }
+            };
+            
+            const handleImageUpload = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Image = e.target.result;
+                    const imageMessage = { type: 'image', url: base64Image };
+                    sendMessage(imageMessage);
+                };
+                reader.readAsDataURL(file);
+                imageInput.value = '';
+            };
+
+            const showConfirm = (text, onConfirm) => {
+                confirmText.textContent = text;
+                confirmCallback = onConfirm;
+                confirmModal.classList.remove('hidden');
+            };
+
+            const hideConfirm = () => {
+                confirmModal.classList.add('hidden');
+                confirmCallback = null;
+            };
+
+            // --- Инициализация и слушатели событий --- //
+
+            loadConfig();
+            loadHistory();
+            
+            sendBtn.addEventListener('click', () => sendMessage(messageInput.value));
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(messageInput.value);
+                }
+            });
+
+            uploadBtn.addEventListener('click', () => imageInput.click());
+            imageInput.addEventListener('change', handleImageUpload);
+            
+            openSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+            closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+            
+            saveSettingsBtn.addEventListener('click', () => {
+                config.username = usernameInput.value;
+                config.apiUrl = apiUrlInput.value;
+                config.apiModel = apiModelInput.value;
+                applyTheme(themeSelect.value);
+                saveConfig();
+                updateGreeting();
+                settingsModal.classList.add('hidden');
+            });
+
+            themeSelect.addEventListener('change', (e) => { applyTheme(e.target.value); });
+            
+            clearHistoryBtn.addEventListener('click', () => {
+                showConfirm('Вы уверены, что хотите очистить всю историю чата? Это действие необратимо.', () => {
+                    chatHistory = [];
+                    localStorage.removeItem('ai-messenger-history');
+                    chatWindow.innerHTML = '';
+                    settingsModal.classList.add('hidden');
+                });
+            });
+
+            confirmCancelBtn.addEventListener('click', hideConfirm);
+            confirmOkBtn.addEventListener('click', () => {
+                if(confirmCallback) confirmCallback();
+                hideConfirm();
+            });
+        });
+    </script>
+</body>
+</html>
