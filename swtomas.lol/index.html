@@ -340,12 +340,12 @@
                              {
                                  role: "user",
                                  content: [
-                                     { type: "text", text: "Что на этом изображении?" },
+                                     { type: "text", text: "Опиши изображение или сделай задание с него, если они есть" },
                                      { type: "image_url", image_url: { url: messageContent.url } }
                                  ]
                              }
                          ],
-                         max_tokens: 500
+                         max_tokens: 1000
                      };
                  }
 
@@ -432,7 +432,7 @@
             themeSelect.addEventListener('change', (e) => { applyTheme(e.target.value); });
             
             clearHistoryBtn.addEventListener('click', () => {
-                showConfirm('Вы уверены, что хотите очистить всю историю чата? Это действие необратимо.', () => {
+                showConfirm('Вы уверены, что хотите очистить всю историю чата?', () => {
                     chatHistory = [];
                     localStorage.removeItem('ai-messenger-history');
                     chatWindow.innerHTML = '';
