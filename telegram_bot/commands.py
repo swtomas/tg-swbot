@@ -4,6 +4,6 @@ from aiogram.filters import Command
 
 router = Router()
 
-@router.message(Command("start"))
+@router.message(Command("starto"))
 async def start(message: Message):
     await message.reply("test")
