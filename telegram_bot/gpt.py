@@ -1,11 +1,12 @@
 import aiohttp
-# NOT READY
+import dict
+
 async def request(text, model):
     url = "soon"
     payload = {
-        "model": "gemini", 
+        "model": model, 
         "messages": [
-            {"role": "system", "content": "promt"},
+            {"role": "system", "content": dict.promt},
             {"role": "user", "content": text}
         ],
         "seed": 101

@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher
 import asyncio
 import os
-import forms, callbacks, commands
+import forms, callbacks, commands, database
 import logging
 from dotenv import load_dotenv
 
@@ -14,6 +14,7 @@ dp = Dispatcher()
 async def main(): 
    try: 
     dp.include_routers(commands.router, forms.router, callbacks.router)
+    await database.init()
     await dp.start_polling(bot)
    except Exception as e:
       print(e)

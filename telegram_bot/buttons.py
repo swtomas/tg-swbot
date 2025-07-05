@@ -16,3 +16,10 @@ def ru_menu():
     builder.button(text="🐟 Deepseek V3", callback_data="deepseekv3")
     builder.adjust(2,1,2)
     return builder.as_markup()
+
+def back():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="◀️ К другим моделям", callback_data="menu")
+    builder.adjust(1,1)
+    return builder.as_markup()
+

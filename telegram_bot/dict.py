@@ -1,4 +1,4 @@
-def ru_menu():
+def menu():
     text = """
 Все доступные нейросети:
 
@@ -26,5 +26,12 @@ def ru_menu():
 - Актуальность базы данных до ??
 
 <b>Выберите модель:</b>
+"""
+    return text
+
+def promt():
+    text = """
+
+
 """
     return text
