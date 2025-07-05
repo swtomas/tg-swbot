@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 BOT_TOKEN = os.getenv("TOKEN")
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=BOT_TOKEN) # type: ignore
+bot = Bot(token=BOT_TOKEN) 
 dp = Dispatcher()
 
 async def main(): 

@@ -6,4 +6,9 @@ from aiogram.fsm.state import StatesGroup, State
 router = Router()
 
 class Form(StatesGroup):
-   pass #soon
+ chatgpt=State()
+ chatgptsearch=State()
+ chatgpto3 = State()
+ deepseekr1 = State()
+ deepseekv3 = State()
+ chatgptimage = State()
